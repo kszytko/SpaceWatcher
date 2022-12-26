@@ -1,0 +1,14 @@
+#include "filewatchercontroller.h"
+
+fileWatcherController::fileWatcherController(QObject *parent)
+    : QObject{parent}
+{
+
+}
+
+void fileWatcherController::startWatching()
+{
+    fileSystemWatcher.addPaths(pathsModel->getPaths());
+    
+    connect(&w, &QFileSystemWatcher::fileChanged, this, )
+}
