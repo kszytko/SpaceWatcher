@@ -31,7 +31,7 @@ private slots:
 
 private:
    void findAllFiles();
-   QStringList getFilesPaths();
+   QStringList getFilesPaths(QFileInfoList & fileInfos);
    void findFilesInDir(QString path);
    QFileInfo getLastFileInfo(const QString & path);
 

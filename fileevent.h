@@ -19,6 +19,7 @@ class FileEvent
 public:
     FileEvent();
     FileEvent(QFileInfo & fileInfo, QDateTime time, Event event);
+    FileEvent(QString path, QDateTime time, Event event, bool isFolder);
 
     QString print();
 

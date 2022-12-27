@@ -14,6 +14,12 @@ FileEvent::FileEvent(QFileInfo &fileInfo, QDateTime time, Event event) :
     isFolder_ = !fileInfo.isFile();
 }
 
+FileEvent::FileEvent(QString path, QDateTime time, Event event, bool isFolder):
+    event_(event), path_(path), time_(time), isFolder_(isFolder)
+{
+
+}
+
 QString FileEvent::print()
 {
     QString output;
