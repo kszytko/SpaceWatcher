@@ -7,6 +7,8 @@
 #include "watchedpathsmodel.h"
 #include "scanneddatamodel.h"
 
+#include "fileevent.h"
+
 class FileWatcherController : public QObject
 {
     Q_OBJECT
@@ -22,18 +24,24 @@ public:
     WatchedPathsModel * getPathsModel();
     ScannedDataModel * getScannedModel();
 
-signals:
 
 private slots:
-
   void directoryChanged(const QString & path);
   void fileChanged(const QString & path);
+
+private:
+   void findAllFiles();
+   QStringList getFilesPaths();
+   void findFilesInDir(QString path);
+   QFileInfo getLastFileInfo(const QString & path);
 
 private:
   WatchedPathsModel * pathsModel;
   ScannedDataModel * scannedModel;
   QFileSystemWatcher * watcher;
 
+  QFileInfoList files;
+  QList<FileEvent> fileEvents;
 };
 
 #endif // FILEWATCHERCONTROLLER_H

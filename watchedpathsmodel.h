@@ -24,19 +24,12 @@ public:
     Q_INVOKABLE void append(const QString &path);
 
     const QStringList & getPaths();
-    void findAllFiles();
-
-    QFileInfoList & getFilesInfo();
-    QStringList getFilesPaths();
 
 private:
     QString formatPath(const QString & path);
 
-    void findFilesInDir(QString path);
-
 private:
     QStringList paths;
-    QFileInfoList allFiles;
 
 };
 
