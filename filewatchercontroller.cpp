@@ -1,5 +1,7 @@
 #include "filewatchercontroller.h"
 #include <QDebug>
+#include <QFileInfo>
+
 FileWatcherController::FileWatcherController(QObject *parent)
     : QObject{parent}
 {
@@ -16,7 +18,9 @@ void FileWatcherController::clearTable()
 void FileWatcherController::startWatching()
 {
     qDebug()<< "StartWatching";
-    watcher->addPaths(pathsModel->getPaths());
+    pathsModel->findAllFiles();
+
+    watcher->addPaths(pathsModel->getFilesPaths());
 
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &FileWatcherController::fileChanged);
     connect(watcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcherController::directoryChanged);
@@ -25,8 +29,16 @@ void FileWatcherController::startWatching()
 void FileWatcherController::stopWatching()
 {
     qDebug()<< "StopWatching";
-    watcher->removePaths(watcher->directories());
-    watcher->removePaths(watcher->files());
+
+    if(!watcher->directories().isEmpty()){
+        watcher->removePaths(watcher->directories());
+        qDebug()<< "Dir Empty";
+    }
+
+    if(!watcher->files().isEmpty()){
+        watcher->removePaths(watcher->files());
+        qDebug()<< "Files Empty";
+    }
 }
 
 WatchedPathsModel *FileWatcherController::getPathsModel()
@@ -42,9 +54,18 @@ ScannedDataModel *FileWatcherController::getScannedModel()
 void FileWatcherController::directoryChanged(const QString &path)
 {
     qDebug() << "DIR edited: " << path;
-}
+    }
 
 void FileWatcherController::fileChanged(const QString &path)
 {
     qDebug() << "Path edited: " << path;
+
+    QFileInfo fileInfo(path);
+
+    if(fileInfo.exists()){
+        qDebug() << "File edited." << path;
+        return;
+    }
+
+    qDebug() << "File renamed or deleted." << path;
 }

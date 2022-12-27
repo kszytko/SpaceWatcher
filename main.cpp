@@ -21,6 +21,11 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("pathsModel", controller.getPathsModel());
     engine.rootContext()->setContextProperty("scannedModel", controller.getScannedModel());
 
+
+    auto model = controller.getPathsModel();
+    model->append("C:/workspace/FindInFiles/a");
+    model->append("C:/workspace/FindInFiles/b");
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     return app.exec();
