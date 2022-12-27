@@ -1,5 +1,6 @@
 #include "watchedpathsmodel.h"
 #include <QHash>
+#include <QString>
 
 WatchedPathsModel::WatchedPathsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -25,7 +26,7 @@ QVariant WatchedPathsModel::data(const QModelIndex &index, int role) const
     if(index.row() >= paths.size())
         return QVariant();
 
-    return paths[index.row()].toString();
+    return paths[index.row()];
 }
 
 Q_INVOKABLE void WatchedPathsModel::remove(int row)
@@ -40,16 +41,22 @@ Q_INVOKABLE void WatchedPathsModel::remove(int row)
     endRemoveRows();
 }
 
-Q_INVOKABLE void WatchedPathsModel::append(const QUrl &path)
+Q_INVOKABLE void WatchedPathsModel::append(const QString &path)
 {
     beginInsertRows(QModelIndex(), paths.size(), paths.size());
-    paths.append(path);
+    paths.append(formatPath(path));
     endInsertRows();
 }
 
-const QStringList WatchedPathsModel::getPaths()
+const QStringList & WatchedPathsModel::getPaths()
 {
+    return paths;
+}
 
+QString WatchedPathsModel::formatPath(const QString &path)
+{
+    QString temp{path};
+    return temp.replace("file:///", "");
 }
 
 

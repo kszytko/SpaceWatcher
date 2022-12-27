@@ -1,5 +1,5 @@
-import QtQuick 2.15
-import QtQuick.Window 2.15
+import QtQuick
+import QtQuick.Window
 import QtQuick.Dialogs
 import QtQuick.Controls
 
@@ -29,8 +29,11 @@ Window {
 
       FolderDialog {
         id: folderDialog
+        title: "Please select folder to watch"
+
         onAccepted: {
-          watchedPathsModel.append(selectedFolder)
+          console.log("User has selected " + folderDialog.selectedFolder)
+          pathsModel.append(selectedFolder)
         }
       }
 
@@ -76,7 +79,7 @@ Window {
 
               anchors.margins: 5
               text: "Remove"
-              onClicked: watchedPathsModel.remove(index)
+              onClicked: pathsModel.remove(index)
             }
           }
         }
@@ -86,7 +89,7 @@ Window {
           //anchors.top: listViewHeader.bottom
           anchors.fill: parent
 
-          model: watchedPathsModel
+          model: pathsModel
           delegate: pathsDelegate
           focus: true
           clip: true
@@ -119,7 +122,7 @@ Window {
         TableView {
           id: tableView
           anchors.fill: parent
-          model: 10
+          model: 5
           delegate: pathsWatchDelegate
 
           clip: true
@@ -128,13 +131,19 @@ Window {
       Row {
         spacing: 20
         Button {
-          text: "start"
+          id: clearButton
+          text: "Clear"
+          onClicked: controller.clearTable()
         }
         Button {
-          text: "start"
+          id: startButton
+          text: "Start"
+          onClicked: controller.startWatching()
         }
         Button {
-          text: "start"
+          id: stopButton
+          text: "Stop"
+          onClicked: controller.stopWatching()
         }
       }
     }

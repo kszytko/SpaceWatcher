@@ -11,10 +11,6 @@ class FileWatcherController : public QObject
 {
     Q_OBJECT
 
-    WatchedPathsModel *pathsModel;
-    ScannedDataModel *filesModel;
-
-    QFileSystemWatcher watcher;
 
 public:
     explicit FileWatcherController(QObject *parent = nullptr);
@@ -23,12 +19,20 @@ public:
     Q_INVOKABLE void startWatching();
     Q_INVOKABLE void stopWatching();
 
+    WatchedPathsModel * getPathsModel();
+    ScannedDataModel * getScannedModel();
+
 signals:
 
 private slots:
 
   void directoryChanged(const QString & path);
   void fileChanged(const QString & path);
+
+private:
+  WatchedPathsModel * pathsModel;
+  ScannedDataModel * scannedModel;
+  QFileSystemWatcher * watcher;
 
 };
 

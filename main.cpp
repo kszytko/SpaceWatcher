@@ -4,7 +4,7 @@
 #include <QQmlContext>
 
 
-#include "watchedpathsmodel.h"
+#include "filewatchercontroller.h"
 
 
 int main(int argc, char *argv[])
@@ -15,16 +15,11 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    WatchedPathsModel watchedPathsModel;
-    QUrl a{"C:/eclipse-workspace"};
-    QUrl b{"C:/eclipse-workspace/test1"};
-    QUrl c{"C:/eclipse-workspace/test2"};
+    FileWatcherController controller;
 
-    watchedPathsModel.append(a);
-    watchedPathsModel.append(b);
-    watchedPathsModel.append(c);
-
-    engine.rootContext()->setContextProperty("watchedPathsModel", &watchedPathsModel);
+    engine.rootContext()->setContextProperty("controller", &controller);
+    engine.rootContext()->setContextProperty("pathsModel", controller.getPathsModel());
+    engine.rootContext()->setContextProperty("scannedModel", controller.getScannedModel());
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 

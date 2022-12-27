@@ -16,14 +16,18 @@ public:
     explicit WatchedPathsModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     Q_INVOKABLE void remove(int row);
-    Q_INVOKABLE void append(const QUrl &path);
+    Q_INVOKABLE void append(const QString &path);
+
+    const QStringList & getPaths();
 
 private:
-    QList<QUrl> paths;
+    QString formatPath(const QString & path);
+
+private:
+    QStringList paths;
 
 };
 
