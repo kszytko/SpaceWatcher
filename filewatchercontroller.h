@@ -33,7 +33,9 @@ private:
    void findAllFiles();
    QStringList getFilesPaths(QFileInfoList & fileInfos);
    void findFilesInDir(QString path);
-   QFileInfo getLastFileInfo(const QString & path);
+   qsizetype getLastFileInfo(const QString & path, QFileInfo & fileInfo);
+   QFileInfoList getLastSubFiles(const QString & path);
+   QFileInfoList findNewFiles(const QFileInfoList & subFiles, const QFileInfoList & lastSubFiles);
 
 private:
   WatchedPathsModel * pathsModel;

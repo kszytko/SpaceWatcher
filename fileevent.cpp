@@ -11,20 +11,19 @@ FileEvent::FileEvent(QFileInfo &fileInfo, QDateTime time, Event event) :
     time_(time)
 {
     path_ = fileInfo.absoluteFilePath();
-    isFolder_ = !fileInfo.isFile();
+    isFile_ = fileInfo.isFile();
 }
 
-FileEvent::FileEvent(QString path, QDateTime time, Event event, bool isFolder):
-    event_(event), path_(path), time_(time), isFolder_(isFolder)
+FileEvent::FileEvent(QString path, QDateTime time, Event event, bool isFile):
+    event_(event), path_(path), time_(time), isFile_(isFile)
 {
 
 }
 
 QString FileEvent::print()
 {
-    QString output;
-    output = " " + path_ + " "+ time_.toString() + " ";
-    output += isFolder_ ? "Folder" : "File";
+    QString output{"%"};
+    output += isFile_ ? "File" : "Folder";
     output += " ";
 
     switch(event_){
@@ -43,6 +42,8 @@ QString FileEvent::print()
     default:
         break;
     }
+
+    output += " " + path_ + " "+ time_.toString();
 
     return output;
 }

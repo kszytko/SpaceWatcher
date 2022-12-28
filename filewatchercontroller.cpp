@@ -101,14 +101,14 @@ QStringList FileWatcherController::getFilesPaths(QFileInfoList & fileInfos)
 
 void FileWatcherController::fileChanged(const QString &path)
 {
-    qDebug() << "Checking file:" << path;
+    qDebug() << "###FILE###" << path;
 
     QFileInfo fileInfo(path);
 
     //Edytowany
     if(fileInfo.exists())
     {
-        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Edited, false);
+        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Edited, true);
         fileEvents.append(fileEvent);
         qDebug() << fileEvent.print();
         return;
@@ -117,7 +117,9 @@ void FileWatcherController::fileChanged(const QString &path)
 
     bool fileRenamed = false;
 
-    auto lastFileInfo = getLastFileInfo(path);
+    QFileInfo lastFileInfo;
+    getLastFileInfo(path, lastFileInfo);
+
     auto fileInfoList = lastFileInfo.absoluteDir().entryInfoList(QDir::Files);
 
     for(const auto & fileInfo : fileInfoList)
@@ -132,13 +134,13 @@ void FileWatcherController::fileChanged(const QString &path)
 
     //Renamed
     if(fileRenamed){
-        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Renamed, false);
+        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Renamed, true);
         fileEvents.append(fileEvent);
         qDebug() << fileEvent.print();
     }
     else
     {
-        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Deleted, false);
+        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Deleted, true);
         fileEvents.append(fileEvent);
         qDebug() << fileEvent.print();
     }
@@ -148,38 +150,123 @@ void FileWatcherController::fileChanged(const QString &path)
 
 void FileWatcherController::directoryChanged(const QString &path)
 {
-    qDebug() << "Checking folder:" << path;
+    qDebug() << "###FOLDER###" << path;
 
-    //File added
+    QFileInfo folder(path);
+
+    if(folder.exists()){
+        //check for folder / file added
+        QDir dir(path);
+        QFileInfoList subFiles = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+
+        auto lastSubFiles = getLastSubFiles(path);
+
+
+        if(subFiles.size() <= lastSubFiles.size()){
+            // Delete or no action, event handled by fileChange or next folderChange
+            //qDebug() << "*PASS*" << path;
+            return;
+        }
+
+        //File or folder added
+        //qDebug() << "File or folder added." << path;
+
+        auto newFileList = findNewFiles(subFiles, lastSubFiles);
+
+        for(QFileInfo & file : newFileList){
+            FileEvent fileEvent(file.absoluteFilePath(), QDateTime::currentDateTime(), Event::Created, file.isFile());
+            fileEvents.append(fileEvent);
+            qDebug() << fileEvent.print();
+        }
+
+        watcher->addPaths(getFilesPaths(newFileList));
+        files.append(newFileList);
+
+        return;
+    }
 
     //Folder rename
 
-    //Folder added
-
     //Folder remove
 
+    bool fileRenamed = false;
+    QFileInfo lastFileInfo, newFileInfo;
+
+    auto index = getLastFileInfo(path, lastFileInfo);
 
 
-    QDir dir(path);
-    QFileInfoList filePaths = dir.entryInfoList(QDir::Files);
-    watcher->addPaths(getFilesPaths(filePaths));
+    auto fileInfoList = lastFileInfo.absoluteDir().entryInfoList(QDir::Dirs);
+
+    for(const auto & fileInfo : fileInfoList)
+    {
+        if(lastFileInfo.size() == fileInfo.size() && files.indexOf(fileInfo) == -1)
+        {
+            newFileInfo = fileInfo;
+            fileRenamed = true;
+            break;
+        }
+    }
+
+    files.removeAt(index);
+
+    //Renamed
+    if(fileRenamed){
+        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Renamed, false);
+        fileEvents.append(fileEvent);
+        qDebug() << fileEvent.print(); 
+
+        watcher->addPath(newFileInfo.absoluteFilePath());
+        files.append(newFileInfo);
+    }
+    else
+    {
+        FileEvent fileEvent(path, QDateTime::currentDateTime(), Event::Deleted, false);
+        fileEvents.append(fileEvent);
+        qDebug() << fileEvent.print();
+    }
+
+
+
+
 }
 
-QFileInfo FileWatcherController::getLastFileInfo(const QString &path)
+qsizetype FileWatcherController::getLastFileInfo(const QString &path, QFileInfo & fileInfo)
 {
     //auto file = std::find_if(files.begin(), files.end(),[&](auto fileInfo)
     //{
     //    return fileInfo.absoluteFilePath() == path;
     //});
 
-    auto index = files.indexOf(QFileInfo(path));
-
-    qDebug() << index;
+    qsizetype index = files.indexOf(QFileInfo(path));
 
     if(index >= 0){
-        qDebug() << files[index];
-        return files[index];
+        fileInfo = files[index];
     }
 
-    return QFileInfo();
+    return index;
+}
+
+QFileInfoList FileWatcherController::getLastSubFiles(const QString &path)
+{
+    QFileInfoList list;
+
+    std::copy_if(files.begin(), files.end(), std::back_inserter(list), [&path](QFileInfo & fileInfo)
+    {
+        return fileInfo.absoluteDir() == path;
+    });
+
+    return list;
+}
+
+QFileInfoList FileWatcherController::findNewFiles(const QFileInfoList &subFiles,const QFileInfoList &lastSubFiles)
+{
+    QFileInfoList list{};
+
+    for(const auto & file : subFiles){
+        if(lastSubFiles.indexOf(file) == -1){
+            list.append(file);
+        }
+    }
+
+    return list;
 }
