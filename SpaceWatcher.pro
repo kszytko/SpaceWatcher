@@ -6,9 +6,9 @@ QT += quick
 
 SOURCES += \
         fileevent.cpp \
+        fileeventsmodel.cpp \
         filewatchercontroller.cpp \
         main.cpp \
-        scanneddatamodel.cpp \
         watchedpathsmodel.cpp
 
 RESOURCES += qml.qrc
@@ -26,6 +26,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     fileevent.h \
+    fileeventsmodel.h \
     filewatchercontroller.h \
-    scanneddatamodel.h \
     watchedpathsmodel.h

@@ -1,14 +1,16 @@
-#ifndef SCANNEDDATAMODEL_H
-#define SCANNEDDATAMODEL_H
+#ifndef FILEEVENTSMODEL_H
+#define FILEEVENTSMODEL_H
 
 #include <QAbstractTableModel>
+#include <QFileInfo>
+#include "fileevent.h"
 
-class ScannedDataModel : public QAbstractTableModel
+class FileEventsModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    explicit ScannedDataModel(QObject *parent = nullptr);
+    explicit FileEventsModel(QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -19,9 +21,13 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-private:
+    void add(const QFileInfo & info, Event event);
+    void clear();
 
+private:
+    QList<FileEvent> fileEvents;
+    QList<QVariant> headers;
 
 };
 
-#endif // SCANNEDDATAMODEL_H
+#endif // FILEEVENTSMODEL_H

@@ -20,9 +20,13 @@ class FileEvent
 public:
     FileEvent();
     FileEvent(const QFileInfo & fileInfo, Event event);
-    FileEvent(const QString path, Event event, bool isFile);
+    FileEvent(QString path, bool isFile, Event event);
 
     QString print();
+    QString getEventString();
+    QString getTimeStamp();
+    QString getPath();
+    QString isFolder();
 
 private:
     Event event_ = Event::Undefined;

@@ -7,18 +7,16 @@ Window {
   width: 640
   height: 480
   visible: true
-  title: qsTr("Hello World")
+  title: qsTr("File watcher")
 
   Rectangle {
     anchors.margins: 10
     anchors.fill: parent
 
-    //color: "red"
     Column {
       width: parent.width
       spacing: 2
 
-      //color: "green"
       Button {
         id: addFolderButton
         width: parent.width
@@ -29,44 +27,40 @@ Window {
 
       FolderDialog {
         id: folderDialog
-        title: "Please select folder to watch"
+        title: qsTr("Please select folder to watch")
 
         onAccepted: {
-          console.log("User has selected " + folderDialog.selectedFolder)
-          pathsModel.append(selectedFolder)
+          pathsModel.append(folderDialog.selectedFolder)
         }
       }
 
       Text {
         id: listViewHeader
-        //anchors.top: addFolderButton.bottom
         topPadding: 10
 
         text: qsTr("Watched Paths")
       }
 
       Rectangle {
-        //anchors.top: listViewHeader.bottom
         width: parent.width
         height: 150
-        color: "green"
 
         Component {
           id: pathsDelegate
           Rectangle {
             id: wrapper
-            //implicitHeight: pathText.implicitHeight
             height: 30
             width: listView.width
 
             border.width: 1
             border.color: "black"
-            radius: 5
 
+            // radius: 5
             color: index % 2 == 1 ? "lightgray" : "white"
 
             Text {
               id: pathText
+              padding: 5
               text: model.display
             }
 
@@ -78,7 +72,8 @@ Window {
               height: parent.height - 10
 
               anchors.margins: 5
-              text: "Remove"
+              text: qsTr("Remove")
+
               onClicked: pathsModel.remove(index)
             }
           }
@@ -86,7 +81,6 @@ Window {
 
         ListView {
           id: listView
-          //anchors.top: listViewHeader.bottom
           anchors.fill: parent
 
           model: pathsModel
@@ -100,34 +94,56 @@ Window {
       Rectangle {
         width: parent.width
         height: 200
-        border.width: 1
-        border.color: "black"
 
-        Component {
-          id: pathsWatchDelegate
-          Rectangle {
-            implicitHeight: watcherText.implicitHeight
-            width: tableView.width
-
-            border.width: 1
-            border.color: "black"
-            radius: 5
-
-            Text {
-              id: watcherText
-              text: "text"
-            }
-          }
+        HorizontalHeaderView {
+          id: tableHeader
+          syncView: tableView
+          anchors.top: parent.top
+          height: 30
+          width: parent.width
+          z: 1
         }
+
         TableView {
           id: tableView
           anchors.fill: parent
-          model: 5
-          delegate: pathsWatchDelegate
-
+          topMargin: tableHeader.implicitHeight
           clip: true
+          z: 0
+
+          function getColumnWeight(column) {
+            switch (column) {
+            case 0:
+              return 0.1
+            case 1:
+              return 0.5
+            case 2:
+              return 0.1
+            case 3:
+              return 0.3
+            default:
+              break
+            }
+          }
+
+          delegate: Rectangle {
+            implicitWidth: tableView.width * tableView.getColumnWeight(
+                             model.column)
+            implicitHeight: 30
+            border.color: "Black"
+            border.width: 1
+
+            Text {
+              id: tableViewText
+              text: model.display
+              padding: 5
+            }
+          }
+
+          model: fileEventsModel
         }
       }
+
       Row {
         spacing: 20
         Button {

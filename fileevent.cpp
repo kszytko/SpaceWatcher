@@ -16,10 +16,10 @@ FileEvent::FileEvent(const QFileInfo &fileInfo, Event event) :
     qDebug() << print();
 }
 
-FileEvent::FileEvent(const QString path, Event event, bool isFile):
+FileEvent::FileEvent(QString path, bool isFile, Event event) :
     event_(event), path_(path), isFile_(isFile)
 {
-    qDebug() << print();
+
 }
 
 QString FileEvent::print()
@@ -27,25 +27,41 @@ QString FileEvent::print()
     QString output{"%"};
     output += isFile_ ? "File" : "Folder";
     output += " ";
-
-    switch(event_){
-    case Event::Edited:
-        output += "Edited";
-        break;
-    case Event::Deleted:
-        output += "Deleted";
-        break;
-    case Event::Renamed:
-        output += "Renamed";
-        break;
-    case Event::Created:
-        output += "Created";
-        break;
-    default:
-        break;
-    }
-
+    output += getEventString();
     output += " " + path_ + " "+ time_.toString();
 
     return output;
+}
+
+QString FileEvent::getEventString()
+{
+    switch(event_){
+    case Event::Edited:
+        return "Edited";
+    case Event::Deleted:
+        return "Deleted";
+    case Event::Renamed:
+        return "Renamed";
+    case Event::Created:
+        return "Created";
+    default:
+        return {};
+    }
+}
+
+QString FileEvent::getTimeStamp()
+{
+    return time_.toString(Qt::TextDate);
+}
+
+
+QString FileEvent::getPath()
+{
+    return path_;
+}
+
+
+QString FileEvent::isFolder()
+{
+    return !isFile_ ? "Yes" : "No";
 }

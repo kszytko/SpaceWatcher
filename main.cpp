@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     engine.rootContext()->setContextProperty("controller", &controller);
     engine.rootContext()->setContextProperty("pathsModel", controller.getPathsModel());
-    engine.rootContext()->setContextProperty("scannedModel", controller.getScannedModel());
+    engine.rootContext()->setContextProperty("fileEventsModel", controller.getFileEventsModel());
 
 
     auto model = controller.getPathsModel();

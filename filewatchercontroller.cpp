@@ -9,12 +9,13 @@ FileWatcherController::FileWatcherController(QObject *parent)
     : QObject{parent}
 {
     pathsModel = new WatchedPathsModel();
-    scannedModel = new ScannedDataModel();
+    fileEventsModel = new FileEventsModel();
     watcher = new QFileSystemWatcher();
 }
 
 void FileWatcherController::clearTable()
 {
+    fileEventsModel->clear();
     qDebug()<< "Clear Table";
 }
 
@@ -50,9 +51,9 @@ WatchedPathsModel *FileWatcherController::getPathsModel()
     return pathsModel;
 }
 
-ScannedDataModel *FileWatcherController::getScannedModel()
+FileEventsModel *FileWatcherController::getFileEventsModel()
 {
-    return scannedModel;
+    return fileEventsModel;
 }
 
 
@@ -63,12 +64,11 @@ void FileWatcherController::findAllDirItems()
     folders.clear();
 
     for(const auto & path: pathsModel->getPaths()){
-        folders.append(QFileInfo(path));
+        folders.emplace_back(path);
         checkSubDir(path);
     }
 
     qDebug() <<"Loaded files";
-    //qDebug() << allFiles;
 }
 
 
@@ -87,7 +87,6 @@ void FileWatcherController::checkSubDir(QString path)
         {
             files.append(item);
         }
-
     }
 }
 
@@ -106,52 +105,12 @@ QStringList FileWatcherController::getPathsFromInfoList(QFileInfoList & infoList
 
 void FileWatcherController::fileChanged(const QString &path)
 {
-    qDebug() << "###FILE###" << path;
-    return;
+    QFileInfo file(path);
 
-    QFileInfo fileInfo(path);
-
-    //Edytowany
-    if(fileInfo.exists())
+    if(file.exists())
     {
-        fileEvents.emplace_back(path, Event::Edited, true);
+        fileEventsModel->add(file, Event::Edited);
         return;
-    }
-
-
-    bool fileRenamed = false;
-
-    QFileInfo newFileInfo;
-
-    int index;
-    QFileInfo lastFileInfo = getLastFileInfo(path, index);
-
-    if(index == FILE_NOT_FOUND) return;
-
-    auto fileInfoList = lastFileInfo.absoluteDir().entryInfoList(QDir::Files);
-
-    for(const auto & fileInfo : fileInfoList)
-    {
-        if(lastFileInfo.size() == fileInfo.size() && files.indexOf(fileInfo) == -1)
-        {
-            newFileInfo = fileInfo;
-            fileRenamed = true;
-            break;
-        }
-    }
-
-    files.removeAt(index);
-
-    //Renamed
-    if(fileRenamed){
-        fileEvents.emplace_back(path, Event::Renamed, true);
-
-        watcher->addPath(newFileInfo.absoluteFilePath());
-        files.append(newFileInfo);
-    }
-    else
-    {
-        fileEvents.emplace_back(path, Event::Deleted, true);
     }
 }
 
@@ -165,41 +124,59 @@ void FileWatcherController::directoryChanged(const QString &path)
     //Check for new file
     QFileInfoList actualFiles = dir.entryInfoList(QDir::Files);
     QFileInfoList lastFiles = getLastDirContent(path, files);
-    QFileInfoList diffFileList = getDifferences(actualFiles, lastFiles);
+
+    QFileInfoList changedFiles = getDifferences(actualFiles, lastFiles);
+    QFileInfoList oldFiles = getDifferences(lastFiles, actualFiles);
 
     //New File
-    if(actualFiles.size() > lastFiles.size()){
-        //No changes
-        if(diffFileList.isEmpty())
-            return;
-
-        for(const auto & file : diffFileList){
-            fileEvents.emplace_back(file, Event::Created);
+    if(actualFiles.size() > lastFiles.size() && !changedFiles.isEmpty()){
+        for(const auto & file : changedFiles){
+            fileEventsModel->add(file, Event::Created);
         }
 
-        watcher->addPaths(getPathsFromInfoList(diffFileList));
-        files.append(diffFileList);
+        watcher->addPaths(getPathsFromInfoList(changedFiles));
+        files.append(changedFiles);
 
         return;
     }
 
+    //Renamed
+    if(actualFiles.size() == lastFiles.size() && !changedFiles.isEmpty() && !oldFiles.isEmpty()){
+        for(const auto & file : oldFiles)
+        {
+            fileEventsModel->add(file, Event::Renamed);
+        }
+
+        watcher->addPaths(getPathsFromInfoList(changedFiles));
+        files = getDifferences(files, oldFiles);
+        files.append(changedFiles);
+
+        return;
+    }
+
+    //Deleted
+    if(actualFiles.size() < lastFiles.size() && !oldFiles.isEmpty()){
+        for(const auto & file : oldFiles)
+        {
+            fileEventsModel->add(file, Event::Deleted);
+        }
+
+        files = getDifferences(files, oldFiles);
+    }
 
     //Check for new folder
-    QFileInfoList actualEntry = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-    QFileInfoList lastEntry = getLastDirContent(path, folders);
+    QFileInfoList actualFolders = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    QFileInfoList lastFolders = getLastDirContent(path, folders);
 
-    QFileInfoList changedFolders = getDifferences(actualEntry, lastEntry);
-    QFileInfoList oldFolders = getDifferences(lastEntry, actualEntry);
+    QFileInfoList changedFolders = getDifferences(actualFolders, lastFolders);
+    QFileInfoList oldFolders = getDifferences(lastFolders, actualFolders);
 
 
     //New folder
-    if(actualEntry.size() > lastEntry.size()){
-        if(changedFolders.isEmpty())
-            return;
-
+    if(actualFolders.size() > lastFolders.size() && !changedFolders.isEmpty()){
         for(const auto & folder : changedFolders)
         {
-            fileEvents.emplace_back(folder, Event::Created);
+            fileEventsModel->add(folder, Event::Created);
         }
 
         watcher->addPaths(getPathsFromInfoList(changedFolders));
@@ -210,13 +187,10 @@ void FileWatcherController::directoryChanged(const QString &path)
 
 
     //Renamed
-    if(actualEntry.size() == lastEntry.size()){
-        if(oldFolders.isEmpty() || changedFolders.isEmpty())
-            return;
-
+    if(actualFolders.size() == lastFolders.size() && !oldFolders.isEmpty() && !changedFolders.isEmpty()){
         for(const auto & folder : oldFolders)
         {
-            fileEvents.emplace_back(folder, Event::Renamed);
+            fileEventsModel->add(folder, Event::Renamed);
         }
 
         watcher->addPaths(getPathsFromInfoList(changedFolders));
@@ -227,13 +201,10 @@ void FileWatcherController::directoryChanged(const QString &path)
     }
 
     //Deleted
-    if(actualEntry.size() < lastEntry.size()){
-        if(oldFolders.isEmpty())
-            return;
-
+    if(actualFolders.size() < lastFolders.size() && !oldFolders.isEmpty()){
         for(const auto & folder : oldFolders)
         {
-            fileEvents.emplace_back(folder, Event::Deleted);
+            fileEventsModel->add(folder, Event::Deleted);
         }
 
         folders = getDifferences(folders, oldFolders);
@@ -268,9 +239,6 @@ QFileInfoList FileWatcherController::getLastDirContent(const QString & path, QFi
 QFileInfoList FileWatcherController::getDifferences(const QFileInfoList &list, const QFileInfoList &substractList)
 {
     QFileInfoList output;
-
-    //std::set_difference(list.begin(), list.end(), substractList.begin(), substractList.end(),
-    //                    std::back_inserter(output));
 
     for(const auto & item : list){
         if(substractList.indexOf(item) == FILE_NOT_FOUND){

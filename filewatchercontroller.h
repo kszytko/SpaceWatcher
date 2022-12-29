@@ -5,7 +5,7 @@
 #include <QFileSystemWatcher>
 
 #include "watchedpathsmodel.h"
-#include "scanneddatamodel.h"
+#include "fileeventsmodel.h"
 
 #include "fileevent.h"
 
@@ -24,7 +24,7 @@ public:
     Q_INVOKABLE void stopWatching();
 
     WatchedPathsModel * getPathsModel();
-    ScannedDataModel * getScannedModel();
+    FileEventsModel * getFileEventsModel();
 
 
 private slots:
@@ -45,13 +45,13 @@ private:
 
 private:
   WatchedPathsModel * pathsModel;
-  ScannedDataModel * scannedModel;
+  FileEventsModel * fileEventsModel;
   QFileSystemWatcher * watcher;
 
   QFileInfoList files;
   QFileInfoList folders;
 
-  QList<FileEvent> fileEvents;
+
 };
 
 #endif // FILEWATCHERCONTROLLER_H
