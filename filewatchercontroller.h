@@ -3,21 +3,20 @@
 
 #include <QObject>
 #include <QFileSystemWatcher>
+#include <QDir>
 
 #include "watchedpathsmodel.h"
 #include "fileeventsmodel.h"
 
-#include "fileevent.h"
-
-constexpr qsizetype FILE_NOT_FOUND = -1;
 
 class FileWatcherController : public QObject
 {
     Q_OBJECT
 
-
 public:
     explicit FileWatcherController(QObject *parent = nullptr);
+
+    Q_PROPERTY(bool watcherState READ watcherState WRITE setwatcherState NOTIFY watcherStateChanged);
 
     Q_INVOKABLE void clearTable();
     Q_INVOKABLE void startWatching();
@@ -26,32 +25,42 @@ public:
     WatchedPathsModel * getPathsModel();
     FileEventsModel * getFileEventsModel();
 
+    bool watcherState() const;
+
+    void setwatcherState(bool newWatcherState);
+
+signals:
+    void watcherStateChanged();
 
 private slots:
-  void directoryChanged(const QString & path);
-  void fileChanged(const QString & path);
+    void directoryChanged(const QString & path);
+    void fileChanged(const QString & path);
 
 private:
-   QStringList getPathsFromInfoList(QFileInfoList & infoList);
+    void findAllDirItems();
+    void checkSubDir(QString path);
 
-   void findAllDirItems();
-   void checkSubDir(QString path);
+    QStringList getPathsFromInfoList(const QFileInfoList & infoList);
+    QFileInfoList getLastDirContent(const QString & path, QFileInfoList & list);
+    QFileInfoList getDifferences(const QFileInfoList & subFiles, const QFileInfoList & lastSubFiles);
 
-   QFileInfo getLastFileInfo(const QString & path, int & index);
-
-   QFileInfoList getLastDirContent(const QString & path, QFileInfoList & list);
-
-   QFileInfoList getDifferences(const QFileInfoList & subFiles, const QFileInfoList & lastSubFiles);
+    void differenceLists(QFileInfoList & items, const QFileInfoList & oldItems);
+    void setCreatedEvent(QFileInfoList & items, const QFileInfoList & changedItems);
+    void setRenamedEvent(QFileInfoList & items, const QFileInfoList & oldItems, const QFileInfoList & changedItems);
+    void setDeletedEvent(QFileInfoList & items, const QFileInfoList & oldItems);
+    void checkChanges(QFileInfoList items, const QDir& dir, QDir::Filters filters);
+    void checkFilesChanges(const QDir & dir);
+    void checkFoldersChanges(const QDir & dir);
 
 private:
-  WatchedPathsModel * pathsModel;
-  FileEventsModel * fileEventsModel;
-  QFileSystemWatcher * watcher;
+    WatchedPathsModel * m_pathsModel;
+    FileEventsModel * m_eventsModel;
+    QFileSystemWatcher * m_systemWatcher;
 
-  QFileInfoList files;
-  QFileInfoList folders;
+    QFileInfoList m_files;
+    QFileInfoList m_folders;
 
-
+    bool m_watcherState = false;
 };
 
 #endif // FILEWATCHERCONTROLLER_H

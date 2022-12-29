@@ -22,9 +22,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("fileEventsModel", controller.getFileEventsModel());
 
 
-    auto model = controller.getPathsModel();
-    model->append("C:/workspace/FindInFiles/a");
-    model->append("C:/workspace/FindInFiles/b");
+    auto pathModel = controller.getPathsModel();
+    pathModel->append("C:/workspace/FindInFiles/a");
+    pathModel->append("C:/workspace/FindInFiles/b");
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 

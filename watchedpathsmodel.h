@@ -24,12 +24,13 @@ public:
     Q_INVOKABLE void append(const QString &path);
 
     const QStringList & getPaths();
+    bool isEmpty() const;
 
 private:
     QString formatPath(const QString & path);
 
 private:
-    QStringList paths;
+    QStringList m_paths;
 
 };
 

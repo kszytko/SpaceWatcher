@@ -8,9 +8,6 @@ FileEventsModel::FileEventsModel(QObject *parent)
     headers << "Path";
     headers << "Is Folder";
     headers << "Timestamp";
-
-    fileEvents.emplace_back("TEST1", true, Event::Created);
-    fileEvents.emplace_back("TEST2", false, Event::Deleted);
 }
 
 QVariant FileEventsModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -70,6 +67,13 @@ void FileEventsModel::add(const QFileInfo &info, Event event)
     beginInsertRows(QModelIndex(), fileEvents.size(), fileEvents.size());
     fileEvents.emplace_back(info, event);
     endInsertRows();
+}
+
+void FileEventsModel::add(const QFileInfoList &list, Event event)
+{
+    for(const auto & file : list){
+        add(file, event);
+    }
 }
 
 void FileEventsModel::clear()

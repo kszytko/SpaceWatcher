@@ -22,6 +22,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     void add(const QFileInfo & info, Event event);
+    void add(const QFileInfoList & list, Event event);
     void clear();
 
 private:

@@ -44,6 +44,9 @@ Window {
       Rectangle {
         width: parent.width
         height: 150
+        border.width: 1
+        border.color: "black"
+        radius: 10
 
         Component {
           id: pathsDelegate
@@ -94,6 +97,9 @@ Window {
       Rectangle {
         width: parent.width
         height: 200
+        border.color: "black"
+        border.width: 1
+        radius: 10
 
         HorizontalHeaderView {
           id: tableHeader
@@ -146,20 +152,34 @@ Window {
 
       Row {
         spacing: 20
+        topPadding: 20
+
         Button {
           id: clearButton
           text: "Clear"
           onClicked: controller.clearTable()
         }
+
         Button {
           id: startButton
-          text: "Start"
-          onClicked: controller.startWatching()
+          text: qsTr("Start")
+
+          onClicked: {
+            controller.startWatching()
+          }
         }
+
         Button {
           id: stopButton
-          text: "Stop"
+          text: qsTr("Stop")
           onClicked: controller.stopWatching()
+        }
+
+        Text {
+          id: watchState
+          leftPadding: 30
+          text: controller.watcherState === true ? "Watching started" : "Stopped"
+          color: controller.watcherState === true ? "green" : "red"
         }
       }
     }
