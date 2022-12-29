@@ -9,6 +9,8 @@
 
 #include "fileevent.h"
 
+constexpr qsizetype FILE_NOT_FOUND = -1;
+
 class FileWatcherController : public QObject
 {
     Q_OBJECT
@@ -30,12 +32,16 @@ private slots:
   void fileChanged(const QString & path);
 
 private:
-   void findAllFiles();
-   QStringList getFilesPaths(QFileInfoList & fileInfos);
-   void findFilesInDir(QString path);
-   qsizetype getLastFileInfo(const QString & path, QFileInfo & fileInfo);
-   QFileInfoList getLastSubFiles(const QString & path);
-   QFileInfoList findNewFiles(const QFileInfoList & subFiles, const QFileInfoList & lastSubFiles);
+   QStringList getPathsFromInfoList(QFileInfoList & infoList);
+
+   void findAllDirItems();
+   void checkSubDir(QString path);
+
+   QFileInfo getLastFileInfo(const QString & path, int & index);
+
+   QFileInfoList getLastDirContent(const QString & path, QFileInfoList & list);
+
+   QFileInfoList getDifferences(const QFileInfoList & subFiles, const QFileInfoList & lastSubFiles);
 
 private:
   WatchedPathsModel * pathsModel;
@@ -43,6 +49,8 @@ private:
   QFileSystemWatcher * watcher;
 
   QFileInfoList files;
+  QFileInfoList folders;
+
   QList<FileEvent> fileEvents;
 };
 

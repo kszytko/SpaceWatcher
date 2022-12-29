@@ -1,23 +1,25 @@
 #include "fileevent.h"
 #include <QString>
+#include <QDebug>
 
 FileEvent::FileEvent()
 {
 
 }
 
-FileEvent::FileEvent(QFileInfo &fileInfo, QDateTime time, Event event) :
-    event_(event),
-    time_(time)
+FileEvent::FileEvent(const QFileInfo &fileInfo, Event event) :
+    event_(event)
 {
     path_ = fileInfo.absoluteFilePath();
     isFile_ = fileInfo.isFile();
+
+    qDebug() << print();
 }
 
-FileEvent::FileEvent(QString path, QDateTime time, Event event, bool isFile):
-    event_(event), path_(path), time_(time), isFile_(isFile)
+FileEvent::FileEvent(const QString path, Event event, bool isFile):
+    event_(event), path_(path), isFile_(isFile)
 {
-
+    qDebug() << print();
 }
 
 QString FileEvent::print()

@@ -11,23 +11,24 @@ enum class Event{
     Created,
     Deleted,
     Edited,
-    Renamed
+    Renamed,
+    Undefined
 };
 
 class FileEvent
 {
 public:
     FileEvent();
-    FileEvent(QFileInfo & fileInfo, QDateTime time, Event event);
-    FileEvent(QString path, QDateTime time, Event event, bool isFile);
+    FileEvent(const QFileInfo & fileInfo, Event event);
+    FileEvent(const QString path, Event event, bool isFile);
 
     QString print();
 
 private:
-    Event event_;
-    QString path_;
-    QDateTime time_;
-    bool isFile_;
+    Event event_ = Event::Undefined;
+    QString path_{};
+    bool isFile_ = false;
+    QDateTime time_ = QDateTime::currentDateTime();
 };
 
 #endif // FILEEVENT_H
