@@ -128,7 +128,7 @@ Window {
             case 3:
               return 0.3
             default:
-              break
+              return 0.25
             }
           }
 

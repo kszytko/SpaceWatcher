@@ -50,7 +50,7 @@ private:
     void setCreatedEvent(QFileInfoList & items, const QFileInfoList & changedItems);
     void setRenamedEvent(QFileInfoList & items, const QFileInfoList & oldItems, const QFileInfoList & changedItems);
     void setDeletedEvent(QFileInfoList & items, const QFileInfoList & oldItems);
-    void checkChanges(QFileInfoList items, const QDir& dir, QDir::Filters filters);
+    void checkChanges(QFileInfoList & items, const QDir & dir, QDir::Filters filters);
     void checkFilesChanges(const QDir & dir);
     void checkFoldersChanges(const QDir & dir);
 

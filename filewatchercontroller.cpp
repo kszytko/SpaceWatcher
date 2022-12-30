@@ -178,7 +178,7 @@ void FileWatcherController::setDeletedEvent(QFileInfoList& items, const QFileInf
     emit itemDeleted();
 }
 
-void FileWatcherController::checkChanges(QFileInfoList items, const QDir& dir, QDir::Filters filters)
+void FileWatcherController::checkChanges(QFileInfoList & items, const QDir & dir, QDir::Filters filters)
 {
     auto actualItems = dir.entryInfoList(filters);
     auto lastItems = getLastDirContent(dir.path(), items);
@@ -236,7 +236,7 @@ void FileWatcherController::downloadKitty()
 {
     QString path = m_pathsModel->getPaths()[0];
     qDebug() << "kitty here:" << path;
-    emit m_downloadController->download(path);
+    m_downloadController->startDownload(path);
 }
 
 bool FileWatcherController::watcherState() const
