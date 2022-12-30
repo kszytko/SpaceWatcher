@@ -43,7 +43,7 @@ private:
 class DownloadController : public QObject
 {
     Q_OBJECT
-    QThreadPool * m_threadPool;
+
 
 public:
     DownloadController();

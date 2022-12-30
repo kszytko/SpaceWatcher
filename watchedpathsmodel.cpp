@@ -62,8 +62,8 @@ bool WatchedPathsModel::isEmpty() const
 
 QString WatchedPathsModel::formatPath(const QString &path)
 {
-    QDir dir(path);
-    return dir.path();
+    QUrl url(path);
+    return url.toLocalFile();;
 }
 
 

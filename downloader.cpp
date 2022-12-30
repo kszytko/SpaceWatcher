@@ -14,24 +14,31 @@ Downloader::Downloader(const QString & path, QObject * parent) :
 
 Downloader::~Downloader()
 {
+    qDebug() << "Jebać";
     shutdownNetworkReply();
     shutdownSaveFile();
-
 }
 
 void Downloader::downloadFile(const QString &destination, const QUrl &url)
 {
+
+
+
+}
+
+void Downloader::run()
+{
     qDebug() << "DownloadFile";
-    QNetworkAccessManager networkAccessManager;
-    QNetworkRequest request(url);
+    m_networkAccessManager = new QNetworkAccessManager();
+    QNetworkRequest request(KITTY_URL);
 
     qDebug() << "SET";
 
-    m_networkReply = networkAccessManager.get(request);
+    m_networkReply = m_networkAccessManager->get(request);
 
-    qDebug() << "File" << destination;
+    qDebug() << "File" << m_path;
 
-    m_saveFile = new QSaveFile(destination);
+    m_saveFile = new QSaveFile(m_path);
 
     if (!m_saveFile->open(QIODevice::WriteOnly)) {
         qDebug() << "ERROR";
@@ -45,13 +52,7 @@ void Downloader::downloadFile(const QString &destination, const QUrl &url)
     connect(m_networkReply, &QNetworkReply::readyRead, this, &Downloader::networkReplyReadyRead);
     connect(m_networkReply, &QNetworkReply::finished, this, &Downloader::networkReplyFinished);
 
-
-}
-
-void Downloader::run()
-{
-    qDebug() << "Run";
-    downloadFile(m_path, KITTY_URL);
+    qDebug() << "FIN";
 }
 
 void Downloader::networkReplyReadyRead()
@@ -67,6 +68,8 @@ void Downloader::networkReplyReadyRead()
 void Downloader::networkReplyFinished()
 {
     qDebug() << "NetworkReplyFinished";
+    shutdownNetworkReply();
+
     if(m_saveFile->commit())
     {
         shutdownSaveFile();
@@ -75,7 +78,9 @@ void Downloader::networkReplyFinished()
     else
     {
         m_saveFile->cancelWriting();
+        shutdownSaveFile();
     }
+
 }
 
 void Downloader::shutdownNetworkReply()
@@ -86,6 +91,7 @@ void Downloader::shutdownNetworkReply()
     disconnect(m_networkReply, &QNetworkReply::finished, this, &Downloader::networkReplyFinished);
 
     m_networkReply->deleteLater();
+    m_networkAccessManager->deleteLater();
 }
 
 void Downloader::shutdownSaveFile()
@@ -97,19 +103,23 @@ void Downloader::shutdownSaveFile()
 }
 
 DownloadController::DownloadController(){
-    qDebug() << "Download controller init";
-    m_threadPool = new QThreadPool();
-    m_threadPool->setMaxThreadCount(4);
+
+
 }
 
 DownloadController::~DownloadController() {
+
 }
 
 void DownloadController::startDownload(const QString & destination)
 {
-    qDebug() << "start download" << destination;
-    Downloader * newDownload = new Downloader(destination);
-    m_threadPool->start(newDownload);
-    m_threadPool->start()
-    qDebug() << "###" << m_threadPool->activeThreadCount();
+    QThread *workerThread = new QThread();
+    Downloader *worker = new Downloader(destination);
+
+    worker->moveToThread(workerThread);
+    //connect(worker, &Downloader::finished, workerThread, &QObject::deleteLater);
+    connect(workerThread, &QThread::finished, worker, &QObject::deleteLater);
+    connect(workerThread, &QThread::finished, workerThread, &QThread::quit);
+    workerThread->start();
+    worker->run();
 }
