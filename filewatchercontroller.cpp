@@ -11,14 +11,12 @@ FileWatcherController::FileWatcherController(QObject *parent)
     m_pathsModel = new WatchedPathsModel();
     m_eventsModel = new FileEventsModel();
     m_systemWatcher = new QFileSystemWatcher();
-
     m_downloadController = new DownloadController();
 }
 
 void FileWatcherController::clearTable()
 {
     m_eventsModel->clear();
-    qDebug()<< "Clear Table";
 }
 
 void FileWatcherController::startWatching()
@@ -36,26 +34,19 @@ void FileWatcherController::startWatching()
 
     connect(m_systemWatcher, &QFileSystemWatcher::fileChanged, this, &FileWatcherController::fileChanged);
     connect(m_systemWatcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcherController::directoryChanged);
-
     connect(this, &FileWatcherController::itemDeleted, this, &FileWatcherController::downloadKitty);
-
-    qDebug()<< "StartWatching";
 
     setwatcherState(true);
 }
 
 void FileWatcherController::stopWatching()
 {
-    qDebug()<< "StopWatching";
-
     if(!m_systemWatcher->directories().isEmpty()){
         m_systemWatcher->removePaths(m_systemWatcher->directories());
-        qDebug()<< "Dir Empty";
     }
 
     if(!m_systemWatcher->files().isEmpty()){
         m_systemWatcher->removePaths(m_systemWatcher->files());
-        qDebug()<< "Files Empty";
     }
 
     setwatcherState(false);
@@ -80,8 +71,6 @@ void FileWatcherController::findAllDirItems()
         m_folders.emplace_back(path);
         checkSubDir(path);
     }
-
-    qDebug() <<"Loaded files";
 }
 
 
@@ -235,7 +224,6 @@ void FileWatcherController::fileChanged(const QString &path)
 void FileWatcherController::downloadKitty()
 {
     QString path = m_pathsModel->getPaths()[0];
-    qDebug() << "kitty here:" << path;
     m_downloadController->startDownload(path);
 }
 
@@ -248,6 +236,7 @@ void FileWatcherController::setwatcherState(bool newWatcherState)
 {
     if (m_watcherState == newWatcherState)
         return;
+
     m_watcherState = newWatcherState;
     emit watcherStateChanged();
 }

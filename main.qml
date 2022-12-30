@@ -117,6 +117,8 @@ Window {
           clip: true
           z: 0
 
+          onWidthChanged: tableView.forceLayout()
+
           function getColumnWeight(column) {
             switch (column) {
             case 0:
@@ -178,7 +180,8 @@ Window {
         Text {
           id: watchState
           leftPadding: 30
-          text: controller.watcherState ? "Watching started" : "Stopped"
+          text: controller.watcherState ? qsTr("Watching started") : qsTr(
+                                            "Stopped")
           color: controller.watcherState ? "green" : "red"
         }
       }

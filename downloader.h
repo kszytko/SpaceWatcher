@@ -16,10 +16,10 @@ class Downloader : public QObject, public QRunnable
 {
     Q_OBJECT
 public:
-    explicit Downloader(const QString & path, QObject * parent = 0);
+    explicit Downloader(const QString & destination, QObject * parent = 0);
     ~Downloader();
 
-    void downloadFile(const QString & path, const QUrl & url);
+    void downloadFile(const QString & destination, const QUrl & url);
     void run() override;
 
 signals:

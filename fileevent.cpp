@@ -4,7 +4,6 @@
 
 FileEvent::FileEvent()
 {
-
 }
 
 FileEvent::FileEvent(const QFileInfo &fileInfo, Event event) :
@@ -12,14 +11,11 @@ FileEvent::FileEvent(const QFileInfo &fileInfo, Event event) :
 {
     path_ = fileInfo.absoluteFilePath();
     isFile_ = fileInfo.isFile();
-
-    qDebug() << print();
 }
 
 FileEvent::FileEvent(QString path, bool isFile, Event event) :
     event_(event), path_(path), isFile_(isFile)
 {
-
 }
 
 QString FileEvent::print()
