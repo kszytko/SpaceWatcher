@@ -178,8 +178,8 @@ Window {
         Text {
           id: watchState
           leftPadding: 30
-          text: controller.watcherState === true ? "Watching started" : "Stopped"
-          color: controller.watcherState === true ? "green" : "red"
+          text: controller.watcherState ? "Watching started" : "Stopped"
+          color: controller.watcherState ? "green" : "red"
         }
       }
     }

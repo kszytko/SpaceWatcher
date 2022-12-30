@@ -3,7 +3,6 @@
 
 #include <QQmlContext>
 
-
 #include "filewatchercontroller.h"
 
 

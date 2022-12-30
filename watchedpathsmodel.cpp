@@ -62,8 +62,10 @@ bool WatchedPathsModel::isEmpty() const
 
 QString WatchedPathsModel::formatPath(const QString &path)
 {
-    QString temp{path};
-    return temp.replace("file:///", "");
+    //QString temp{path};
+    //return temp.replace("file:///", "");
+    QUrl qurl(path);
+    return QUrl(path).path();
 }
 
 

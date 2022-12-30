@@ -7,6 +7,7 @@
 
 #include "watchedpathsmodel.h"
 #include "fileeventsmodel.h"
+#include "downloader.h"
 
 
 class FileWatcherController : public QObject
@@ -26,15 +27,16 @@ public:
     FileEventsModel * getFileEventsModel();
 
     bool watcherState() const;
-
     void setwatcherState(bool newWatcherState);
 
 signals:
     void watcherStateChanged();
+    void itemDeleted();
 
 private slots:
     void directoryChanged(const QString & path);
     void fileChanged(const QString & path);
+    void downloadKitty();
 
 private:
     void findAllDirItems();
@@ -61,6 +63,8 @@ private:
     QFileInfoList m_folders;
 
     bool m_watcherState = false;
+
+    DownloadController * m_downloadController;
 };
 
 #endif // FILEWATCHERCONTROLLER_H

@@ -11,6 +11,8 @@ FileWatcherController::FileWatcherController(QObject *parent)
     m_pathsModel = new WatchedPathsModel();
     m_eventsModel = new FileEventsModel();
     m_systemWatcher = new QFileSystemWatcher();
+
+    m_downloadController = new DownloadController();
 }
 
 void FileWatcherController::clearTable()
@@ -34,6 +36,8 @@ void FileWatcherController::startWatching()
 
     connect(m_systemWatcher, &QFileSystemWatcher::fileChanged, this, &FileWatcherController::fileChanged);
     connect(m_systemWatcher, &QFileSystemWatcher::directoryChanged, this, &FileWatcherController::directoryChanged);
+
+    connect(this, &FileWatcherController::itemDeleted, this, &FileWatcherController::downloadKitty);
 
     qDebug()<< "StartWatching";
 
@@ -170,6 +174,8 @@ void FileWatcherController::setDeletedEvent(QFileInfoList& items, const QFileInf
 
     m_eventsModel->add(oldItems, Event::Deleted);
     differenceLists(items, oldItems);
+
+    emit itemDeleted();
 }
 
 void FileWatcherController::checkChanges(QFileInfoList items, const QDir& dir, QDir::Filters filters)
@@ -224,6 +230,13 @@ void FileWatcherController::fileChanged(const QString &path)
 
     if(file.exists())
         m_eventsModel->add(file, Event::Edited);
+}
+
+void FileWatcherController::downloadKitty()
+{
+    QString path = m_pathsModel->getPaths()[0];
+    qDebug() << "kitty here:" << path;
+    emit m_downloadController->download(path);
 }
 
 bool FileWatcherController::watcherState() const
