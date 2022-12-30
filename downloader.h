@@ -7,7 +7,6 @@
 #include <QNetworkReply>
 #include <QSaveFile>
 #include <QThread>
-#include <QThreadPool>
 #include <QRunnable>
 
 const QUrl KITTY_URL("https://cataas.com/cat/says/hello%20world!");

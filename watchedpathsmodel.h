@@ -1,11 +1,9 @@
 #ifndef WATCHEDPATHSMODEL_H
 #define WATCHEDPATHSMODEL_H
 
-#include <qqml.h>
 #include <QAbstractListModel>
 #include <QUrl>
 #include <QList>
-
 #include <QFileInfoList>
 
 

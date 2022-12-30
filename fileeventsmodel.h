@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QFileInfo>
+
 #include "fileevent.h"
 
 class FileEventsModel : public QAbstractTableModel
